@@ -1,0 +1,16 @@
+.form-group.required>label:after {
+	content:"*";color:red;
+}
+
+.form-group.required>label {
+	font-weight: bold;
+}
+
+#id_role label {
+	font-weight: bold;
+}
+
+label.dd-selected-text, label.dd-option-text {
+	margin-bottom: 0;
+	justify-content: initial;
+}

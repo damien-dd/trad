@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static i18n bootstrap4 %}
+
+{% block title %}{% translate 'Sign up' %}{% endblock %}
+
+
+{% block content %}
+<div class="row justify-content-center text-center mt-3"><div class="col-md-8">
+<h3 class="py-2">{% translate 'Take part in reclaim of media power' %}</h3>
+</div></div>
+
+<div class="row justify-content-center"><div class="col-md-8">
+<p>
+	<form method="POST" class="form-group">
+	{% csrf_token %}
+	{% bootstrap_field form.role layout='horizontal' %}
+	{% bootstrap_form form exclude='role' layout='horizontal' %}
+	<button type="submit" class="btn btn-success">{% translate 'Sign up' %}</button>
+	</form>
+</p>
+</div></div>
+
+{% autoescape on %}
+{% translate 'contributor role description' as contributor_descr %}
+{% translate 'translator role description' as translator_descr %}
+{% translate 'videographer role description' as videographer_descr %}
+{% endautoescape %}
+<!--
+$("<p>{{contributor_descr|escapejs}}</p>" ).insertAfter("label.form-check-label[for='id_role_0']");
+$("<p>{% translate 'translator role description' %}</p>" ).insertAfter("label.form-check-label[for='id_role_1']");
+$("<span class='text-success'> ({% translate 'subject to validation' %})</span><p>{% translate 'videographer role description' %}</p>" ).insertAfter("label.form-check-label[for='id_role_2']");-->
+
+<script type="text/javascript">
+		$(document).ready(function() {
+			$('#id_channel').attr('disabled', 'disabled');
+			$("{{ contributor_descr | linebreaks }}" ).insertAfter("label.form-check-label[for='id_role_0']");
+			$("{{ translator_descr | linebreaks }}" ).insertAfter("label.form-check-label[for='id_role_1']");
+			$("<span class='text-success'> ({% translate 'subject to validation' %})</span>{{ videographer_descr | linebreaks }}" ).insertAfter("label.form-check-label[for='id_role_2']");
+
+			$('input:radio[name="role"]').change(function() {
+				if ($(this).val() == 'VI') {
+					$('#id_channel').removeAttr('disabled');
+				} else {
+					$('#id_channel').attr('disabled', 'disabled');
+				}
+			});
+		});
+</script>
+{% endblock %}
+
