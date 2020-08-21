@@ -11,7 +11,13 @@
 	<form method="post" action="{% url 'login' %}">
 		{% csrf_token %}
 		{% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+
 		{% bootstrap_form form show_label=False %}
+{% if form.errors %}
+		<div class="alert alert-warning alert-dismissible"><button class="close" type="button" data-dismiss="alert" aria-label="close">×</button>
+		Veuillez également noter que pour pouvoir vous connecter, vous devez <strong>d'abord valider votre email</strong> en cliquant sur le lien disponible dans l'email qui vous à été envoyé lors de votre inscription. Si vous ne le trouvez pas, vérifiez dans les <em>spams</em> ou utilisez le <a href="{% url 'password_reset' %}" class="alert-link">lien de réinitialisation de mot de passe</a>.
+		</div>
+{% endif %}
 		<p class="text-left"><a href="{% url 'password_reset' %}">{% translate 'Reset my password' %}</a></p>
 		<button class="btn btn-lg btn-primary btn-block" type="submit">{% translate 'Log in' %}</button>
 	</form>

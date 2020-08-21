@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static i18n bootstrap4 %}
+
+{% block content %}
+
+<p></p>
+<div class="row justify-content-center">
+
+<div class="col-10 text-center">
+<h3>Les chaines</h3>
+</div>
+	{% for channel in channels %}
+
+<div class="col-sm-4 col-md-3">
+	<div class="card my-2">
+		<div class="card-body p-1 text-center">
+		<h5 class="card-title"><a href="{{channel.url}}">{{channel.title}}</a></h5>
+
+		<p class="card-text">
+			<a href="{{channel.url}}"><img src="{{channel.image_url}}" class="img-fluid"></a>
+		</p>
+		</div>
+		<div class="card-footer p-1 text-center">
+		par <em>{{channel.user.username}}</em>
+		<button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#channel-{{channel.id}}">Voir plus</button>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="channel-{{channel.id}}" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-dialog" role="document"><div class="modal-content">
+	<div class="modal-header">
+		<span class="modal-title" id="channel-{{channel.id}}"><h4><a href="{{channel.url}}">{{channel.title}}</a></h4> <h6>par <em>{{channel.user.username}}</em></h6></span>
+
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+
+	<div class="modal-body">{{channel.descr|linebreaks}}</div>
+
+	<div class="modal-footer">
+		<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+	</div>
+</div></div>
+</div>
+
+	{% endfor %}
+</div>
+
+<div class="row justify-content-center m-5">
+<h3>Trad.pub compte à ce jour <span class="badge badge-primary">{{translators|length}}</span> traducteurs et traductrices</h3>
+
+<div class="col-md-8 text-justify">
+	<p>Sans eux, il n'y aurait ni sous-titrages ni doublages, ils sont les héros qui contribuent à la prise du pouvoir médiatique, voici la liste des traducteurs et traductrices qui vous permettent chaque jour d'accéder à l'information:</p>
+	<p class="h4">{% for translator in translators %}<span class="badge badge-pill badge-secondary">{{translator}}</span> {% endfor %}</p>
+</div>
+
+</div>
+{% endblock %}
+

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static i18n bootstrap4 %}
+
+{% block title %}{% trans "My channel" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-8">
+<div class="text-center">
+	<h3 class="py-2 pt-4">{% trans "My channel" %}</h3>
+</div>
+<p>
+	{% if form %}
+	{% if not channel.is_verified %}
+	<div class="alert alert-dismissible alert-info">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		<strong>Note: </strong> Votre chaine est en attente de vérification.
+	</div>
+	{% endif %}
+
+<div class="row justify-content-center">
+<div class="col-sm-6 col-md-4">
+	<div class="card mb-5">
+		<div class="card-body p-1 text-center">
+		<h5 class="card-title"><a href="{{channel.url}}">{{channel.title}}</a></h5>
+
+		<p class="card-text">
+			<a href="{{channel.url}}"><img src="{{channel.image_url}}" class="img-fluid"></a>
+		</p>
+		</div>
+		<div class="card-footer p-1 text-center">
+		par <em>{{channel.user.username}}</em> <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#channel-{{channel.id}}">Voir plus</button>
+		</div>
+	</div>
+</div>
+</div>
+
+<div class="modal fade" id="channel-{{channel.id}}" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-dialog" role="document"><div class="modal-content">
+	<div class="modal-header">
+		<span class="modal-title" id="channel-{{channel.id}}"><h4><a href="{{channel.url}}">{{channel.title}}</a></h4> <h6>par <em>{{channel.user.username}}</em></h6></span>
+
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+
+	<div class="modal-body">{{channel.descr|linebreaks}}</div>
+
+	<div class="modal-footer">
+		<button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+	</div>
+</div></div>
+</div>
+
+
+	<form method="POST" enctype="multipart/form-data" class="form-group">
+	{% csrf_token %}
+	{% bootstrap_form form layout='horizontal' %}
+	<button type="submit" class="btn btn-success">{% trans "Save" %}</button>
+	</form>
+	{% endif %}
+</p>
+</div>
+</div>
+{% endblock %}
+

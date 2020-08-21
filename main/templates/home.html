@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static i18n bootstrap4 %}
+
+{% block content %}
+
+<p class="text-center">
+{% if user.is_authenticated %}
+	<a href="{% url 'add_video' %}" class="btn btn-lg btn-success mt-3">Proposer une vidéo à traduire</a><br>
+{% endif %}
+{% if title2 %}
+	<h3 class="text-center">{{title2}}</h3>
+{% endif %}
+</p>
+<div class="row">
+	{% for video in videos %}
+
+<div class="col-sm-6 col-md-4">
+	<div class="card my-2">
+		{% if video.source.platform_type == 'YT' %}
+		<div class="youtube-player" data-id="{{video.source.video_id}}">
+			<img src="https://i3.ytimg.com/vi/{{video.source.video_id}}/mqdefault.jpg"><div class="play"></div>
+		</div>
+		{% else %}
+		<div class="youtube-player"><a href="{{video.source.url}}" class="play"></a></div>
+		{% endif %}
+		<div class="card-body p-1">
+		<h5 class="card-title mb-1"><a href="{% url 'video' video.id %}">{{video.title}}</a></h5>
+
+		<div class="card-text"><p class="mb-1">
+Proposée le {{video.submitted_at|date}} par <em><a{% if video.submitted_by.channel %} href="{{video.submitted_by.channel.url}}"{% endif %}>{{video.submitted_by}}</a></em>
+</p>
+<p class="h5">{% for tag in video.tags_list %}<span class="badge badge-pill badge-secondary">{{tag}}</span> {% endfor %}</p>
+<p class="mb-1">
+{% for group, lang, done in video.translation_status %}
+		<span class="badge badge-secondary{% if not done %} opacity-2{% endif %}">{{group}} <img class="rounded" src="{% static 'flags/4x3/' %}{{lang}}.svg" height=18 /></span>{% endfor %}
+		</p></div>
+		</div>
+		<div class="card-footer p-1 text-center vote{% if video.id in user_votes %} voted{% endif %}">
+			<strong class="vote-count">{{video.votes}}</strong> votes
+			{% if user.is_authenticated %}
+			<a href="{% url 'video_vote_add' video.id %}" class="vote-link vote-add d-none text-muted"><i class="fas fa-thumbs-up"></i></a>
+			<a href="{% url 'video_vote_remove' video.id %}" class="vote-link vote-remove d-none text-primary"><i class="fas fa-thumbs-up"></i></a>
+			{% endif %}
+		</div>
+	</div>
+</div>
+	{% empty %}
+<div class="col text-center">
+	<h4 class="py-4"><em>Aucune vidéo à afficher pour ces critères de sélection.</em></h4>
+</div>
+	{% endfor %}
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$('div.youtube-player').on('click', function(e) {
+		if ($(this).data('id')) {
+			$(this).html('<iframe src="https://www.youtube.com/embed/'+ $(this).data("id") +'?autoplay=1" width="100%" frameborder="0" allowfullscreen allow=autoplay></iframe>');
+		}
+	});
+{% if user.is_authenticated %}
+	$('.vote').each(function() {
+		if ($( this ).hasClass('voted')) {
+			$(' .vote-link.vote-add', this).hide();
+		} else {
+			$(' .vote-link.vote-remove', this).hide();
+		}
+	});
+	$('.vote-link').removeClass('d-none');
+	$('.vote-link').on('click', function(e) {
+		e.preventDefault();
+		var link = $(this);
+		$.get(link.attr('href'), function(data) {
+			$('.vote-count', link.parent()).text(data.total);
+			link.parent().children('.vote-link').toggle();
+		});
+	});
+{% endif %}
+});
+</script>
+
+{% endblock %}
+

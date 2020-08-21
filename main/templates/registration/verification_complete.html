@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static i18n bootstrap4 %}
+
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8">
+<p>
+{% if verified %}
+<div class="alert alert-success">
+	Votre adresse email à bien été validée. Vous pouvez maintenant <a class="alert-link" href="{% url 'login' %}">vous connecter</a>.
+</div>
+{% else %}
+<div class="alert alert-danger">
+	Votre adresse email n'a pas pu être validée.
+</div>
+
+{% endif %}
+</p>
+</div></div>
+{% endblock %}
+

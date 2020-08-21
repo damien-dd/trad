@@ -3,7 +3,6 @@
 
 {% block title %}{% translate 'Sign up' %}{% endblock %}
 
-
 {% block content %}
 <div class="row justify-content-center text-center mt-3"><div class="col-md-8">
 <h3 class="py-2">{% translate 'Take part in reclaim of media power' %}</h3>
@@ -11,36 +10,61 @@
 
 <div class="row justify-content-center"><div class="col-md-8">
 <p>
+
+{% if user %}
+	<div class="alert alert-success">
+		Merci de votre inscription! Pour pouvoir vous connecter, vous devez d'abord cliquer sur le lien disponible dans l'email qui viens de vous être envoyé afin de valider votre addresse email ({{user.email}}).
+	</div>
+	{% if user.role == 'VI' %}
+	<div class="alert alert-info">
+		Vous vous êtes inscrit en tant que vidéaste. Votre chaine va être soumise à l'approbation d'un modérateur. Nous vous invitons à <strong>ajouter</strong> une <strong>image</strong> et une <strong>courte description</strong> de votre chaîne via votre espace client accessible depuis le menu déroulant en haut à droite lorsque vous êtes connecté.
+	</div>
+	{% endif %}
+{% else %}
 	<form method="POST" class="form-group">
 	{% csrf_token %}
-	{% bootstrap_field form.role layout='horizontal' %}
-	{% bootstrap_form form exclude='role' layout='horizontal' %}
-	<button type="submit" class="btn btn-success">{% translate 'Sign up' %}</button>
+
+	<div class="collapse multi-collapse{% if not form.errors %} show{% endif %}" id="part1">
+		{% bootstrap_field form.role layout='horizontal' %}
+		<a id="next" class="btn btn-primary{% if not form.errors %} disabled{% endif %}" href="#">Suivant</a>
+	</div>
+	<div class="collapse multi-collapse{% if form.errors %} show{% endif %}" id="part2">
+		{% bootstrap_form form exclude='role' layout='horizontal' %}
+		<button type="button" class="btn btn-secondary" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" aria-controls="part1 part2">Précédent</button>
+		<button type="submit" class="btn btn-success">{% translate 'Sign up' %}</button>
+	</div>
 	</form>
-</p>
-</div></div>
 
-{% autoescape on %}
-{% translate 'contributor role description' as contributor_descr %}
-{% translate 'translator role description' as translator_descr %}
-{% translate 'videographer role description' as videographer_descr %}
-{% endautoescape %}
-
-<script type="text/javascript">
+	<script type="text/javascript">
 		$(document).ready(function() {
-			$('#id_channel').attr('disabled', 'disabled');
-			$("{{ contributor_descr | linebreaks }}" ).insertAfter("label.form-check-label[for='id_role_0']");
-			$("{{ translator_descr | linebreaks }}" ).insertAfter("label.form-check-label[for='id_role_1']");
-			$("<span class='text-success'> ({% translate 'subject to validation' %})</span>{{ videographer_descr | linebreaks }}" ).insertAfter("label.form-check-label[for='id_role_2']");
+			if ('{{ form.role.value }}' == 'VI') {
+				$('#id_channel').parent().parent().removeClass('invisible');
+			} else {
+				$('#id_channel').parent().parent().addClass('invisible');
+			}
+
+			$("<p>Proposez des vidéos à la traduction et votez pour les vidéos que vous aimeriez voir être traduites.</p>" ).insertAfter("label.form-check-label[for='id_role_0']");
+			$("<p>Participez à l'écriture des transcripts et aux traductions, proposez des vidéos à la traduction et votez pour les vidéos que vous aimeriez voir être traduites.</p>" ).insertAfter("label.form-check-label[for='id_role_1']");
+			$("<span class='text-success'> (soumis à validation)</span><p>Vous avez une chaine Youtube sur laquelle vous postez des vidéos sous-titrées ou doublées en français.<br>Participez à l'écriture des transcripts et aux traductions, proposez des vidéos à la traduction et votez pour les vidéos que vous aimeriez voir être traduites.</p>" ).insertAfter("label.form-check-label[for='id_role_2']");
 
 			$('input:radio[name="role"]').change(function() {
+				$('#next').removeClass('disabled');
 				if ($(this).val() == 'VI') {
-					$('#id_channel').removeAttr('disabled');
+					$('#id_channel').parent().parent().removeClass('invisible');
 				} else {
-					$('#id_channel').attr('disabled', 'disabled');
+					$('#id_channel').parent().parent().addClass('invisible');
 				}
 			});
+			$('#next').on('click', function() {
+				$('.multi-collapse').collapse('toggle');
+			});
 		});
-</script>
+	</script>
+{% endif %}
+</p>
+
+</div></div>
+
+
 {% endblock %}
 

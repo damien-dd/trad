@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static i18n bootstrap4 %}
+
+{% block content %}
+
+<p></p>
+<div class="row">
+
+<div class="col-12">
+	<div class="card my-2">
+	<div class="row align-items-center">
+
+		<div class="col-md-4 col-sm-5">
+		{% with video.source.get_embed_url as embed_url %}
+		<div class="videoWrapper"><iframe src="{{embed_url}}" width="100%" frameborder="0" allowfullscreen=""></iframe></div>
+		{% endwith %}
+		</div>
+
+		<div class="col-md-5 col-sm-4 col-8"><div class="m-1">
+			<h5>{{video.title}}</h5>
+			<h6 class="text-muted">Proposée le {{video.submitted_at|date}} par <em><a{% if video.submitted_by.channel %} href="{{video.submitted_by.channel.url}}"{% endif %}>{{video.submitted_by}}</a></em></h6>
+			<p class="h5">{% for tag in video.tags_list %}<span class="badge badge-pill badge-secondary">{{tag}}</span> {% endfor %}</p>
+			<p>
+	{% for attachment in attachments %}
+			<span class="badge badge-secondary{% if not attachment.done %} opacity-2{% endif %}">{{attachment.group}} <img class="rounded" src="{% static 'flags/4x3/' %}{{attachment.lang}}.svg" height=18 /></span>{% endfor %}
+			</p>
+		</div></div>
+		<div class="col-sm-3 col-4">
+			<div class="card bg-secondary m-2">
+				<div class="card-body text-center p-2 vote{% if user_vote %} voted{% endif %}">
+					<h3 class="card-title mb-0 vote-count">{{video.votes}}</h3>
+					<h5 class="card-text">votes</h5>
+					{% if user.is_authenticated %}
+					<a href="{% url 'video_vote_add' video.id %}" class="h3 vote-link vote-add d-none text-muted"><i class="fas fa-thumbs-up"></i></a>
+					<a href="{% url 'video_vote_remove' video.id %}" class="h3 vote-link vote-remove d-none text-primary"><i class="fas fa-thumbs-up"></i></a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+</div>
+</div>
+
+<div class="row">
+	<div class="col-6 col-md-3"><div class="card my-2">
+		<div class="text-center mt-2">
+			<h3 class="card-title">Transcript <img class="rounded" src="{% static 'flags/4x3/' %}{{video.lang}}.svg" height=18 /></h3>
+		</div>
+
+		{% for transcript in video.transcripts_original %}
+		<div class="card bg-secondary mx-2 mb-2">
+			<div class="row align-items-center">
+				<div class="col mx-1">
+				    <h5>{{transcript.created}}</h5>
+					{% if transcript.creator == user or perms.main.delete_videofile %}
+					<a class="text-danger delete-link" href="{% url 'video_transcript_delete' video.id transcript.id %}"><i class="fas fa-times-circle"></i> Supprimer</a><br>{% endif %}
+				    <span>par <em>{{transcript.creator}}</em></span>
+					
+				</div>
+				<div class="col-auto m-1">
+					<a class="btn btn-primary" href="{{transcript.upload.url}}" download><i class="fas fa-download fa-2x"></i></a>
+				</div>
+			</div>
+		</div>
+		{% empty %}
+		<p class="text-center">Aucun transcript pour le moment.</p>
+		{% endfor %}
+		{% if user.is_translator or perms.main.add_videofile %}
+		<div class="form-group mx-2 mb-2">
+			<form method="POST" enctype="multipart/form-data">
+			<div class="input-group">
+				<div class="custom-file">{% csrf_token %}
+					<input type="file" name="{{ form_tr_vo.upload.html_name }}" class="custom-file-input form-control-file" id="{{ form_tr_vo.upload.id_for_label }}" required>
+					<label class="custom-file-label" for="{{ form_tr_vo.upload.id_for_label }}"></label>
+				</div>
+				<div class="input-group-append">
+					<button class="btn btn-success" type="submit"><i class="fas fa-upload"></i></button>
+				</div>
+			</div>
+			</form>
+		</div>
+		{% endif %}
+	</div></div>
+
+	<div class="col-6 col-md-3"><div class="card my-2">
+		<div class="text-center mt-2">
+			<h3 class="card-title">Transcript <img class="rounded" src="{% static 'flags/4x3/' %}fr.svg" height=18 /></h3>
+		</div>
+
+		{% for transcript in video.transcripts_translated %}
+		<div class="card bg-secondary mx-2 mb-2">
+			<div class="row align-items-center">
+				<div class="col mx-1">
+				    <h5>{{transcript.created}}</h5>
+					{% if transcript.creator == user or perms.main.delete_videofile %}
+					<a class="text-danger delete-link" href="{% url 'video_transcript_delete' video.id transcript.id %}"><i class="fas fa-times-circle"></i> Supprimer</a><br>{% endif %}
+				    <span>par <em>{{transcript.creator}}</em></span>
+				</div>
+				<div class="col-auto m-1">
+					<a class="btn btn-primary" href="{{transcript.upload.url}}" download><i class="fas fa-download fa-2x"></i></a>
+				</div>
+			</div>
+		</div>
+		{% empty %}
+		<p class="text-center">Aucun transcript pour le moment.</p>
+		{% endfor %}
+		{% if user.is_translator or perms.main.add_videofile %}
+		<div class="form-group mx-2 mb-2">
+			<form method="POST" enctype="multipart/form-data">
+			<div class="input-group">
+				<div class="custom-file">{% csrf_token %}
+					<input type="file" name="{{ form_tr_vf.upload.html_name }}" class="custom-file-input form-control-file" id="{{ form_tr_vf.upload.id_for_label }}" required>
+					<label class="custom-file-label" for="{{ form_tr_vf.upload.id_for_label }}"></label>
+				</div>
+				<div class="input-group-append">
+					<button class="btn btn-success" type="submit"><i class="fas fa-upload"></i></button>
+				</div>
+			</div>
+			</form>
+		</div>
+		{% endif %}
+	</div></div>
+
+	<div class="col-6 col-md-3"><div class="card my-2">
+		<div class="text-center mt-2">
+			<h3 class="card-title">Sous-titres <img class="rounded" src="{% static 'flags/4x3/' %}{{video.lang}}.svg" height=18 /></h3>
+		</div>
+
+		{% for subtitle in video.subtitles_original %}
+		<div class="card bg-secondary mx-2 mb-2">
+			<div class="row align-items-center">
+				<div class="col mx-1">
+				    <h5>{{subtitle.created}}</h5>
+					{% if subtitle.creator == user or perms.main.delete_videofile %}
+					<a class="text-danger delete-link" href="{% url 'video_subtitle_delete' video.id subtitle.id %}"><i class="fas fa-times-circle"></i> Supprimer</a><br>{% endif %}
+				    <span>par <em>{{subtitle.creator}}</em></span>
+				</div>
+				<div class="col-auto m-1">
+					<a class="btn btn-primary" href="{{subtitle.upload.url}}" download><i class="fas fa-download fa-2x"></i></a>
+				</div>
+			</div>
+		</div>
+		{% empty %}
+		<p class="text-center">Aucun sous-titre pour le moment.</p>
+		{% endfor %}
+		{% if user.is_translator or perms.main.add_videofile %}
+		<div class="form-group mx-2 mb-2">
+			<form method="POST" enctype="multipart/form-data">
+			<div class="input-group">
+				<div class="custom-file">{% csrf_token %}
+					<input type="file" name="{{ form_sub_vo.upload.html_name }}" class="custom-file-input form-control-file" id="{{ form_sub_vo.upload.id_for_label }}" required>
+					<label class="custom-file-label" for="{{ form_sub_vo.upload.id_for_label }}"></label>
+				</div>
+				<div class="input-group-append">
+					<button class="btn btn-success" type="submit"><i class="fas fa-upload"></i></button>
+				</div>
+			</div>
+			</form>
+		</div>
+		{% endif %}
+	</div></div>
+
+	<div class="col-6 col-md-3"><div class="card my-2">
+		<div class="text-center mt-2">
+			<h3 class="card-title">Sous-titres <img class="rounded" src="{% static 'flags/4x3/' %}fr.svg" height=18 /></h3>
+		</div>
+
+		{% for subtitle in video.subtitles_translated %}
+		<div class="card bg-secondary mx-2 mb-2">
+			<div class="row align-items-center">
+				<div class="col mx-1">
+				    <h5>{{subtitle.created}}</h5>
+					{% if subtitle.creator == user or perms.main.delete_videofile %}
+					<a class="text-danger delete-link" href="{% url 'video_subtitle_delete' video.id subtitle.id %}"><i class="fas fa-times-circle"></i> Supprimer</a><br>{% endif %}
+				    <span>par <em>{{subtitle.creator}}</em></span>
+				</div>
+				<div class="col-auto m-1">
+					<a class="btn btn-primary" href="{{subtitles.upload.url}}" download><i class="fas fa-download fa-2x"></i></a>
+				</div>
+			</div>
+		</div>
+		{% empty %}
+		<p class="text-center">Aucun sous-titre pour le moment.</p>
+		{% endfor %}
+		{% if user.is_translator or perms.main.add_videofile %}
+		<div class="form-group mx-2 mb-2">
+			<form method="POST" enctype="multipart/form-data">
+			<div class="input-group">
+				<div class="custom-file">{% csrf_token %}
+					<input type="file" name="{{ form_sub_vf.upload.html_name }}" class="custom-file-input form-control-file" id="{{ form_sub_vf.upload.id_for_label }}" required>
+					<label class="custom-file-label" for="{{ form_sub_vf.upload.id_for_label }}"></label>
+				</div>
+				<div class="input-group-append">
+					<button class="btn btn-success" type="submit"><i class="fas fa-upload"></i></button>
+				</div>
+			</div>
+			</form>
+		</div>
+		{% endif %}
+	</div></div>
+</div>
+
+{% if user.is_authenticated %}
+<div class="row justify-content-md-center">
+<div class="col-md-8">
+	<div class="card my-2" id="discussion">
+			<h3 class="card-header text-center"><i class="fas fa-comments"></i> Discussion</h3>
+			<div class="card-body scrollable-content">
+				{% for comment in video.comments %}<div class="row justify-content-{% if comment.author == user %}end{% else %}start{% endif %}">
+				<div class="toast show m-1">
+					<div class="toast-header p-1{% if comment.author == user %} own-comment{% endif %}">
+						<strong class="mr-2">{{comment.author}}</strong><small>{{comment.posted_at}}</small>{% if comment.author == user or perms.main.delete_videocomment %}
+						<a class="text-danger delete-link ml-2 mb-0" href="{% url 'video_comment_delete' video.id comment.id %}#discussion"><i class="fas fa-times"></i></a>{% endif %}
+					</div>
+					<div class="toast-body p-1">{{comment.comment|linebreaksbr}}</div>
+				</div></div>
+				{% endfor %}
+			</div>
+			{% if user.is_translator or perms.main.add_videocomment %}
+			<div class="card-footer">
+				<form method="POST" class="form-group" action="#discussion">{% csrf_token %}
+				{% bootstrap_field form_comment.comment show_label=False %}		
+				<button type="submit" class="btn btn-primary">Poster</button>
+				</form>
+			</div>
+			{% endif %}
+	</div>
+</div>
+</div>
+{% endif %}
+
+<script type="text/javascript">
+	$(document).ready(function() {
+{% if user.is_authenticated %}
+		$('.scrollable-content').scrollTop($('.scrollable-content')[0].scrollHeight);
+		$('.vote').each(function() {
+			if ($( this ).hasClass('voted')) {
+				$(' .vote-link.vote-add', this).hide();
+			} else {
+				$(' .vote-link.vote-remove', this).hide();
+			}
+		});
+		$('.vote-link').removeClass('d-none');
+		$('.vote-link').on('click', function(e) {
+			e.preventDefault();
+			var link = $(this);
+			$.get(link.attr('href'), function(data) {
+				$('.vote-count', link.parent()).text(data.total);
+				link.parent().children('.vote-link').toggle();
+			});
+		});
+{% endif %}
+		$(".custom-file-input").on("change", function() {
+			var fileName = $(this).val().split("\\").pop();
+			$(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+		});
+		$('.delete-link').on("click", function() {
+			return confirm("Etes-vous sur de vouloir supprimer cet élément définitivement?");
+		});
+	});
+</script>
+
+{% endblock %}
+

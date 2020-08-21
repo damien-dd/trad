@@ -20,19 +20,22 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ccily@b3p(%!mhw1y_f$9=g0in6qpo4l1g7)_&!ujno&=!prcz'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: keep the secret key used in production secret!
+if DEBUG:
+    SECRET_KEY = 'ccily@b3p(%!mhw1y_f$9=g0in6qpo4l1g7)_&!ujno&=!prcz'
+else:
+    with open(BASE_DIR / 'secret_key.txt') as f:
+        SECRET_KEY = f.read().strip() # Load secret key from file in production
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-	'main',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,13 +46,12 @@ INSTALLED_APPS = [
     'captcha',
     'django_select2',
     'django_extensions',
-    
+    'main',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -62,7 +64,7 @@ ROOT_URLCONF = 'trad.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / '../main/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -71,6 +73,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n',
+				'main.context_processor.form_search',
             ],
         },
     },
@@ -87,6 +90,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+	#'default': {
+    #    'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #    'NAME': '<database_name>',
+    #    'USER': '<database_user>',
+    #    'PASSWORD': '<password>',
+    #    'HOST': 'localhost',
+    #    'PORT': ''
+    #}
 }
 
 AUTH_USER_MODEL = 'main.User'
@@ -113,7 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-FR'
 
 TIME_ZONE = 'Europe/Paris'
 
@@ -125,27 +136,40 @@ USE_TZ = True
 
 LOCALE_PATHS = (BASE_DIR / 'locale', )
 
-LANGUAGES = [
-    ('en', _('English')),
-    ('fr', _('French')),
-    ('de', _('German')),
-    ('es', _('Spanish')),
-    ('it', _('Italian')),
-]
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
 STATIC_ROOT = BASE_DIR / 'static'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Redirection after login
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 
 AUTHENTICATION_BACKENDS = [
-    'main.backends.EmailOrUsernameModelBackend',
-    'django.contrib.auth.backends.ModelBackend'
+    'main.backends.EmailOrUsernameModelBackend'
 ]
+
+# SMTP Email settings
+# https://docs.djangoproject.com/en/3.1/topics/email/
+
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_HOST_USER = 'noreply@gmail.com' 
+#EMAIL_HOST_PASSWORD = 'password_goes_here'
+#EMAIL_PORT = 587
+#EMAIL_USE_TLS = True
+#DEFAULT_FROM_EMAIL = 'Traduisons l\'information <noreply@gmail.com>'
+
+
+BOOTSTRAP4 = {
+    'required_css_class': 'required',
+}
+
+# Keys for reCAPTCHA v2 (required to use ReCaptchaField from 'recaptcha' app / 'django-recaptcha' package)
+# Get keys pair from http://www.google.com/recaptcha/admin
+RECAPTCHA_PUBLIC_KEY = 'public_key_goes_here'
+RECAPTCHA_PRIVATE_KEY = 'private_key_goes_here'
 

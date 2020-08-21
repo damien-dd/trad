@@ -8,7 +8,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>{% block title %}{{title|default:'Trad'}}{% endblock %}</title>
 
-	<link href="{% static 'css/bootstrap-lumen.min.css' %}" rel="stylesheet">
+	<link href="{% static 'css/' %}{{request.session.bootstrap_theme|default:'bootstrap-lumen.min.css'}}" rel="stylesheet">
 	<link href="{% static 'fontawesome-free-5.14.0-web/css/all.css' %}" rel="stylesheet">
 	<link href="{% static 'css/custom.css' %}" rel="stylesheet">
 	<link href="{% static 'css/select2.min.css' %}" rel="stylesheet">
@@ -24,27 +24,44 @@
 <body>
 <!-- Top menu -->
 <div class="container-fluid px-0">
-<nav class="navbar navbar-fixed-top navbar-expand-md navbar-dark bg-primary"><div class="container">
-	<span class="navbar-brand">{% block menu_title %}Trad{% endblock %}</span>
+<nav class="navbar navbar-fixed-top navbar-expand-md navbar-dark bg-primary"><div class="container-xl">
+	<a class="navbar-brand" href="{% url 'home' %}"><strong>Trad</strong></a>
 
 	<div class="collapse navbar-collapse" id="navbar">
 		<ul class="navbar-nav mr-auto">
 			<li class="nav-item">
-				<form class="form-inline ">
-					<input class="form-control" type="text" placeholder="{% trans 'Search' %}">
-					<button class="btn btn-secondary ml-2" type="submit"><i class="fas fa-search"></i></button>
+				<form method="POST" action="{% url 'home' %}" class="input-group">
+					
+					<input name="{{form_search.text.html_name}}" class="form-control" type="text" placeholder="{% trans 'Search' %}" value="{{form_search.text.value|default:''}}" required>
+					{% csrf_token %}
+					<div class="input-group-append">
+						<div class="input-group-text px-1">
+						<div class="custom-control custom-switch">
+							<input name="{{form_search.done.html_name}}" type="checkbox" class="custom-control-input" id="customSwitch1"{% if form_search.done.value and not search_todo %} checked=""{% endif %}>
+							<label class="custom-control-label" for="customSwitch1">{% if form_search.done.value and not search_todo %}faite{% else %}à faire{% endif %}</label>
+						</div></div>
+						<button class="btn btn-secondary" type="submit"><i class="fas fa-search"></i></button>
+					</div>
 				</form>
 			</li>
-	{% if user.is_staff %}
-			<li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}"><i class="fas fa-tools"></i> {% trans "Admin" %}</a></li>
-	{% endif %}
 		</ul>
-	<ul class="navbar-nav">
+		<ul class="navbar-nav">
+			<li class="nav-item{% if request.resolver_match.url_name == 'todo' %} active{% endif %}"><a class="nav-link" href="{% url 'todo' %}">à&nbsp;faire</a></li>
+			<li class="nav-item{% if request.resolver_match.url_name == 'done' %} active{% endif %}"><a class="nav-link" href="{% url 'done' %}">faites</a></li>
+			<li class="nav-item{% if request.resolver_match.url_name == 'channels' %} active{% endif %}"><a class="nav-link" href="{% url 'channels' %}"><i class="fab fa-youtube"></i>&nbsp;Les Chaînes</a></li>
+			<li class="nav-item{% if request.resolver_match.url_name == 'tools' %} active{% endif %}"><a class="nav-link" href="{% url 'tools' %}">Outils</a></li>
 			{% if user.is_authenticated %}
 			<li class="nav-item dropdown">
-				<a href="#" class="nav-item nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-user"></i> {{ user.username }} ({{ user.email }}) <span class="caret"></span></a>
+				<a href="#" class="nav-item nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-user"></i> <span class="caret"></span></a>
 				<div class="dropdown-menu dropdown-menu-right">
-					
+					<span class="dropdown-item" href="#"><i class="fas fa-user"></i> {{ user.username }} <span class="badge badge-pill badge-secondary">{{user.get_role_display}}</span><br><i class="fas fa-at"></i> {{ user.email }}</span>
+					<div class="dropdown-divider"></div>
+{% if user.is_staff %}
+					<a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-tools"></i> Administration</a>
+{% endif %}
+{% if user.role == 'VI' %}
+					<a class="dropdown-item" href="{% url 'edit_channel' %}"><i class="fab fa-youtube"></i> Ma chaine</a>
+{% endif %}
 					<a class="dropdown-item" href="{% url 'password_change' %}"><i class="fas fa-key"></i> {% trans "Change password" %}</a>
 					<div class="dropdown-divider"></div>
 					<a class="dropdown-item" href="{% url 'logout' %}"><i class="fa fa-power-off"></i> {% trans "Log out" %}</a>
@@ -52,29 +69,24 @@
 				</div>
 			</li>
 			{% else %}
-			<li class="nav-item active"><a class="nav-link" href="{% url 'login' %}"><i class="fa fa-sign-in-alt"></i> {% trans "Log in" %}</a></li>
+			<li class="nav-item{% if request.resolver_match.url_name == 'login' %} active{% endif %}"><a class="nav-link" href="{% url 'login' %}"><i class="fa fa-sign-in-alt"></i> {% trans "Log in" %}</a></li>
+			<li class="nav-item"><a class="btn btn-success" href="{% url 'register' %}" type="submit">Participer</a></li>
 			{% endif %}
-
-<li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarLang" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <img class="mb-1 rounded" src="{% static 'flags/4x3/' %}{{LANGUAGE_CODE}}.svg" height=18 />
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarLang">
-{% get_available_languages as LANGUAGES %}
-{% get_language_info_list for LANGUAGES as languages %}
-		{% for language in languages %}
-			<form action="{% url 'set_language' %}" method="post">{% csrf_token %}
-				<input name="next" type="hidden" value="{{request.path|strip_url_lang_prefix}}" />
-				<input name="language" type="hidden" value="{{ language.code }}" />
-				<button class="dropdown-item{% if language.code == LANGUAGE_CODE %} active{% endif %}" type="submit"><img class="rounded" src="{% static 'flags/4x3/' %}{{ language.code }}.svg" height=18 /> {{ language.name_local|title }}</button>
-			</form>
-		{% endfor %}
-        </div>
-      </li>
-			
 		</ul>
+	</div>
 
-</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#customSwitch1').on('change', function () {
+
+			if ($(this).is(':checked') === true) {
+				$(this).next().text('faite');
+			} else {
+				$(this).next().text('à faire');
+			}
+			});
+		});
+	</script>
 
 	<button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span>
 	</button>
@@ -84,7 +96,7 @@
 </div>
 
 <!-- main content -->
-<div class="container">
+<div class="container-xl">
 {% if title %}<div class="row justify-content-center text-center"><div class="col-md-8"><h3 class="py-4">{{ title }}</h3>{% endif %}
 {% block content %}{% endblock %}
 {% if title %}</div></div>{% endif %}

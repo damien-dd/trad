@@ -1,0 +1,14 @@
+{% load i18n %}{% autoescape off %}
+Vous recevez ce message en réponse à votre inscription sur {{ site_name }}.
+
+Veuillez vous rendre sur cette page afin de valider votre adresse email et pouvoir vous connecter à votre compte:
+
+{{ verify_url }}
+
+{% translate 'Your username, in case you’ve forgotten:' %} {{ user.get_username }}
+
+{% translate "Thanks for using our site!" %}
+
+{% blocktranslate %}The {{ site_name }} team{% endblocktranslate %}
+
+{% endautoescape %}
