@@ -27,8 +27,10 @@ pip install -r requirements.txt
 ```
 
 - Set up and create all database tables
+```
 ./manage.py migrate
-By default it will use SQLite database which shall only be used for test. For production you can setup another database backend in [settings.py](trad/settings.py)
+```
+> By default it will use SQLite database which shall only be used for test. For production you can setup another database backend in [settings.py](trad/settings.py)
 
 
 ### Run the test server
